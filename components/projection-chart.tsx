@@ -21,7 +21,7 @@ type ProjectionChartProps = {
 };
 
 const W = 1000;
-const H = 440;
+const H = 620;
 const PAD = { top: 24, right: 20, bottom: 36, left: 64 };
 
 const fmtUsd = (n: number) =>
@@ -221,6 +221,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
     <div className="svg-chart-wrap">
       <div
         className="svg-chart-canvas"
+        style={{ "--chart-aspect": `${W} / ${H}` } as React.CSSProperties}
         onMouseLeave={() => setHoverIndex(null)}
         onMouseMove={(e) => {
           const el = e.currentTarget.getBoundingClientRect();
@@ -231,14 +232,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
           setHoverIndex(idx);
         }}
       >
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          preserveAspectRatio="none"
-          width="100%"
-          height="100%"
-          role="img"
-          aria-label="Projection chart"
-        >
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" role="img" aria-label="Projection chart">
         <defs>
           <linearGradient id="bandCagrNominal" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--chart-fixed-nominal)" stopOpacity="0.25" />
