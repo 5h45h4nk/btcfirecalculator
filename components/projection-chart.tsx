@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ProjectionPoint } from "@/lib/projections";
 
 type ValueView = "both" | "nominal" | "real";
@@ -47,6 +47,7 @@ const bandPath = (top: Array<{ x: number; y: number }>, bottom: Array<{ x: numbe
 export function ProjectionChart({ points, valueView, yScale, modelVisibility }: ProjectionChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [hoverLegendTone, setHoverLegendTone] = useState<string | null>(null);
+  const [isCompact, setIsCompact] = useState(false);
 
   const xMin = 0;
   const xMax = Math.max(...points.map((p) => p.year));
@@ -142,16 +143,35 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
   const mcRealTop = points.map((p) => ({ x: xToPx(p.year), y: yToPx(p.mcP90Real) }));
   const mcRealBottom = points.map((p) => ({ x: xToPx(p.year), y: yToPx(p.mcP10Real) }));
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const media = window.matchMedia("(max-width: 768px)");
+    const apply = () => setIsCompact(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+
   const yTicks = (() => {
     if (yScale === "log") {
       const lo = Math.floor(Math.log10(yMin));
       const hi = Math.ceil(Math.log10(yMax));
-      return Array.from({ length: hi - lo + 1 }, (_, i) => Math.pow(10, lo + i));
+      const raw = Array.from({ length: hi - lo + 1 }, (_, i) => Math.pow(10, lo + i));
+      if (!isCompact) {
+        return raw;
+      }
+      return raw.filter((_, idx) => idx % 2 === 0 || idx === raw.length - 1);
     }
-    return Array.from({ length: 6 }, (_, i) => yMin + ((yMax - yMin) * i) / 5);
+    const count = isCompact ? 5 : 6;
+    return Array.from({ length: count }, (_, i) => yMin + ((yMax - yMin) * i) / (count - 1));
   })();
 
-  const xTicks = Array.from({ length: 11 }, (_, i) => Math.round((xMax * i) / 10));
+  const xTickCount = isCompact ? 7 : 11;
+  const xTicks = Array.from({ length: xTickCount }, (_, i) =>
+    Math.round((xMax * i) / (xTickCount - 1))
+  );
 
   const hoverPoint = hoverIndex !== null ? points[hoverIndex] : null;
   const toneOpacity = (tone: string) =>
@@ -264,7 +284,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               stroke="rgba(255,255,255,0.13)"
               strokeDasharray="2 4"
             />
-            <text x={10} y={yToPx(v) + 4} fill="#cfe9ff" fontSize="12">
+            <text x={10} y={yToPx(v) + 4} fill="#cfe9ff" fontSize={isCompact ? "16" : "12"}>
               {compactUsd(v)}
             </text>
           </g>
@@ -280,7 +300,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               stroke="rgba(255,255,255,0.13)"
               strokeDasharray="2 4"
             />
-            <text x={xToPx(v)} y={H - 10} textAnchor="middle" fill="#cfe9ff" fontSize="12">
+            <text x={xToPx(v)} y={H - 10} textAnchor="middle" fill="#cfe9ff" fontSize={isCompact ? "16" : "12"}>
               {v}
             </text>
           </g>
