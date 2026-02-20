@@ -10,6 +10,7 @@ type ProjectionChartProps = {
   points: ProjectionPoint[];
   valueView: ValueView;
   yScale: YScale;
+  highlightTones?: string[];
   modelVisibility: {
     fixed: boolean;
     cagr: boolean;
@@ -44,7 +45,13 @@ const bandPath = (top: Array<{ x: number; y: number }>, bottom: Array<{ x: numbe
     .map((p) => `L${p.x.toFixed(2)},${p.y.toFixed(2)}`)
     .join(" ")} Z`;
 
-export function ProjectionChart({ points, valueView, yScale, modelVisibility }: ProjectionChartProps) {
+export function ProjectionChart({
+  points,
+  valueView,
+  yScale,
+  modelVisibility,
+  highlightTones
+}: ProjectionChartProps) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [hoverLegendTone, setHoverLegendTone] = useState<string | null>(null);
   const [isCompact, setIsCompact] = useState(false);
@@ -174,10 +181,18 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
   );
 
   const hoverPoint = hoverIndex !== null ? points[hoverIndex] : null;
-  const toneOpacity = (tone: string) =>
-    hoverLegendTone === null || hoverLegendTone === tone ? 1 : 0.16;
-  const toneStrokeWidth = (tone: string, base: number) =>
-    hoverLegendTone === tone ? base + 1 : base;
+  const externalHighlightSet = new Set(highlightTones ?? []);
+  const isToneActive = (tone: string) => {
+    if (hoverLegendTone) {
+      return hoverLegendTone === tone;
+    }
+    if (externalHighlightSet.size === 0) {
+      return true;
+    }
+    return externalHighlightSet.has(tone);
+  };
+  const toneOpacity = (tone: string) => (isToneActive(tone) ? 1 : 0.16);
+  const toneStrokeWidth = (tone: string, base: number) => (isToneActive(tone) ? base + 1 : base);
   const updateHoverByClientX = (clientX: number, el: HTMLDivElement) => {
     const rect = el.getBoundingClientRect();
     const x = clientX - rect.left;
@@ -505,7 +520,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
         {legendItems.map((item) => (
           <div
             key={item.label}
-            className={`chart-legend-item ${hoverLegendTone === item.tone ? "active" : ""}`}
+            className={`chart-legend-item ${isToneActive(item.tone) ? "active" : ""}`}
             onMouseEnter={() => setHoverLegendTone(item.tone)}
             onMouseLeave={() => setHoverLegendTone(null)}
           >

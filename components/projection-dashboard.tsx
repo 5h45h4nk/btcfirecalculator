@@ -9,6 +9,9 @@ type ValueView = "both" | "nominal" | "real";
 type YScale = "log" | "linear";
 type InputTab = "core" | "scenarios" | "models" | "display";
 type ThemeName = "neon" | "tron" | "bitcoin";
+type AcademyTab = "models" | "inputs";
+type AcademyLevel = "beginner" | "advanced";
+type FocusModel = "fixed" | "cagr" | "s2f" | "powerLaw" | "monteCarlo" | "halving";
 type ModelVisibility = {
   fixed: boolean;
   cagr: boolean;
@@ -32,6 +35,100 @@ const safeNumber = (value: string, fallback: number) => {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
 };
+
+const MODEL_ACADEMY = [
+  {
+    key: "fixed" as const,
+    title: "Fixed Annual Growth",
+    kind: "Line",
+    beginner:
+      "Uses one constant yearly growth rate. Good for a fast baseline, but real markets are not this smooth.",
+    advanced:
+      "Compounds value with one annual rate r: V(t)=V0*(1+r)^t. Deterministic and highly rate-sensitive."
+  },
+  {
+    key: "cagr" as const,
+    title: "CAGR Scenarios",
+    kind: "Range + Line",
+    beginner:
+      "Shows bear/base/bull paths so you can compare pessimistic vs optimistic outcomes.",
+    advanced:
+      "Three constant-rate trajectories with base line and bear-bull envelope. Scenario assumptions, not probabilities."
+  },
+  {
+    key: "s2f" as const,
+    title: "Stock-to-Flow Style",
+    kind: "Line",
+    beginner:
+      "Assumes increasing scarcity from halvings can drive long-term value growth.",
+    advanced:
+      "Scales by scarcity ratio growth with exponent and optional decay term to damp future effect."
+  },
+  {
+    key: "powerLaw" as const,
+    title: "Power-Law Trend",
+    kind: "Line",
+    beginner:
+      "Uses a long-term time trend tied to BTC network age, not short-term market cycles.",
+    advanced:
+      "Applies age-based scaling ((age+t)/age)^k. Exponent choice strongly controls slope."
+  },
+  {
+    key: "monteCarlo" as const,
+    title: "Monte Carlo",
+    kind: "Band + Median",
+    beginner:
+      "Simulates many random paths and shows likely range (p10-p90) plus median (p50).",
+    advanced:
+      "Random yearly returns from drift + volatility. Quantiles from simulation distribution at each horizon."
+  },
+  {
+    key: "halving" as const,
+    title: "Halving Cycle",
+    kind: "Line",
+    beginner:
+      "Adds repeating 4-year style cycle waves around a long-term trend.",
+    advanced:
+      "Trend + sinusoidal cycle with optional decay by cycle index, approximating diminishing cycle intensity."
+  }
+];
+
+const INPUT_ACADEMY = [
+  {
+    group: "Core",
+    items: [
+      { name: "BTC owned", meaning: "How many BTC you hold.", effect: "Scales all outcomes up/down.", impact: "High" },
+      { name: "Manual BTC price", meaning: "Year-0 USD price anchor.", effect: "Reanchors every curve.", impact: "High" },
+      { name: "Inflation (%)", meaning: "Discount rate for real values.", effect: "Higher inflation lowers real lines.", impact: "High" }
+    ]
+  },
+  {
+    group: "Scenarios",
+    items: [
+      { name: "Fixed growth (%)", meaning: "Single annual compounding rate.", effect: "Moves fixed line exponentially.", impact: "High" },
+      { name: "CAGR bear/base/bull", meaning: "Three constant scenario rates.", effect: "Shifts base and widens/narrows range.", impact: "High" }
+    ]
+  },
+  {
+    group: "Model Inputs",
+    items: [
+      { name: "S2F exponent", meaning: "Scarcity sensitivity.", effect: "Higher value steepens S2F curve.", impact: "High" },
+      { name: "S2F decay", meaning: "Dampens S2F over time.", effect: "Higher value flattens S2F.", impact: "Medium" },
+      { name: "Power-law exponent", meaning: "Trend steepness control.", effect: "Higher value increases long-run slope.", impact: "High" },
+      { name: "MC drift / volatility", meaning: "Expected return and randomness.", effect: "Drift shifts center; volatility widens band.", impact: "High" },
+      { name: "MC simulations", meaning: "Number of random paths.", effect: "Higher count stabilizes percentile estimates.", impact: "Medium" },
+      { name: "Halving base/amplitude/decay", meaning: "Cycle trend, wave size, fade rate.", effect: "Controls cycle level, swing, and fade.", impact: "High" }
+    ]
+  },
+  {
+    group: "Display",
+    items: [
+      { name: "Value view", meaning: "Nominal, real, or both.", effect: "Display only, no math change.", impact: "Low" },
+      { name: "Y-axis scale", meaning: "Linear vs log scale.", effect: "Readability only, no math change.", impact: "Low" },
+      { name: "Visible models", meaning: "Show/hide series.", effect: "Declutters chart.", impact: "Low" }
+    ]
+  }
+];
 
 export function ProjectionDashboard() {
   const [btcOwned, setBtcOwned] = useState(1);
@@ -64,6 +161,9 @@ export function ProjectionDashboard() {
   const [valueView, setValueView] = useState<ValueView>("both");
   const [yScale, setYScale] = useState<YScale>("log");
   const [activeInputTab, setActiveInputTab] = useState<InputTab>("core");
+  const [academyTab, setAcademyTab] = useState<AcademyTab>("models");
+  const [academyLevel, setAcademyLevel] = useState<AcademyLevel>("beginner");
+  const [focusedModel, setFocusedModel] = useState<FocusModel | null>(null);
   const [theme, setTheme] = useState<ThemeName>("bitcoin");
   const [modelVisibility, setModelVisibility] = useState<ModelVisibility>({
     fixed: true,
@@ -170,6 +270,17 @@ export function ProjectionDashboard() {
       mcP50Real: point.mcP50Real
     };
   });
+
+  const focusTones = focusedModel
+    ? {
+        fixed: ["fixedNominal", "fixedReal"],
+        cagr: ["cagrNominal", "cagrReal", "bandCagrNominal", "bandCagrReal"],
+        s2f: ["s2fNominal", "s2fReal"],
+        powerLaw: ["powerNominal", "powerReal"],
+        monteCarlo: ["mcMedianNominal", "mcMedianReal", "bandMcNominal", "bandMcReal"],
+        halving: ["halvingNominal", "halvingReal"]
+      }[focusedModel]
+    : undefined;
 
   return (
     <main className={`page-shell theme-${theme}`}>
@@ -734,6 +845,92 @@ export function ProjectionDashboard() {
       </section>
 
       <section className="panel">
+        <div className="academy-head">
+          <h2>Model Academy</h2>
+          <div className="academy-controls">
+            <div className="academy-tab-group" role="tablist" aria-label="Academy tabs">
+              <button
+                type="button"
+                className={`input-tab ${academyTab === "models" ? "active" : ""}`}
+                onClick={() => setAcademyTab("models")}
+              >
+                Models
+              </button>
+              <button
+                type="button"
+                className={`input-tab ${academyTab === "inputs" ? "active" : ""}`}
+                onClick={() => setAcademyTab("inputs")}
+              >
+                Inputs
+              </button>
+            </div>
+            <div className="academy-level-group">
+              <button
+                type="button"
+                className={`input-tab ${academyLevel === "beginner" ? "active" : ""}`}
+                onClick={() => setAcademyLevel("beginner")}
+              >
+                Beginner
+              </button>
+              <button
+                type="button"
+                className={`input-tab ${academyLevel === "advanced" ? "active" : ""}`}
+                onClick={() => setAcademyLevel("advanced")}
+              >
+                Advanced
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {academyTab === "models" && (
+          <div className="academy-model-grid">
+            {MODEL_ACADEMY.map((model) => (
+              <button
+                key={model.key}
+                type="button"
+                className={`academy-model-card ${focusedModel === model.key ? "active" : ""}`}
+                onClick={() =>
+                  setFocusedModel((prev) => (prev === model.key ? null : model.key))
+                }
+              >
+                <div className="academy-model-top">
+                  <h3>{model.title}</h3>
+                  <span className="academy-kind">{model.kind}</span>
+                </div>
+                <p>{academyLevel === "beginner" ? model.beginner : model.advanced}</p>
+                <span className="academy-hint">
+                  {focusedModel === model.key ? "Highlighted in chart" : "Tap to highlight in chart"}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {academyTab === "inputs" && (
+          <div className="academy-input-grid">
+            {INPUT_ACADEMY.map((group) => (
+              <article key={group.group} className="academy-input-group">
+                <h3>{group.group}</h3>
+                <div className="academy-input-list">
+                  {group.items.map((item) => (
+                    <div key={item.name} className="academy-input-item">
+                      <p className="academy-input-title">{item.name}</p>
+                      <p>{item.meaning}</p>
+                      <p>{item.effect}</p>
+                      <span className={`academy-impact impact-${item.impact.toLowerCase()}`}>
+                        {item.impact} impact
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="panel">
         <h2>Projection Chart</h2>
         <div className="chart-wrap">
           <ProjectionChart
@@ -741,6 +938,7 @@ export function ProjectionDashboard() {
             valueView={valueView}
             yScale={yScale}
             modelVisibility={modelVisibility}
+            highlightTones={focusTones}
           />
         </div>
       </section>
