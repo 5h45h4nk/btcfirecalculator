@@ -267,6 +267,26 @@ button:not(.input-tab):not(.academy-model-card):hover {
   margin-bottom: 14px;
 }
 
+.academy-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.academy-toggle {
+  border: 1px solid rgba(149, 226, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(8, 14, 36, 0.8);
+  color: var(--txt-main);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.academy-controls.collapsed {
+  display: none;
+}
+
 .academy-controls {
   display: grid;
   gap: 8px;

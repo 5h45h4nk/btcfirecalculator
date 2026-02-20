@@ -164,6 +164,7 @@ export function ProjectionDashboard() {
   const [academyTab, setAcademyTab] = useState<AcademyTab>("models");
   const [academyLevel, setAcademyLevel] = useState<AcademyLevel>("beginner");
   const [focusedModel, setFocusedModel] = useState<FocusModel | null>(null);
+  const [academyCollapsed, setAcademyCollapsed] = useState(true);
   const [theme, setTheme] = useState<ThemeName>("bitcoin");
   const [modelVisibility, setModelVisibility] = useState<ModelVisibility>({
     fixed: true,
@@ -846,8 +847,17 @@ export function ProjectionDashboard() {
 
       <section className="panel">
         <div className="academy-head">
-          <h2>Model Academy</h2>
-          <div className="academy-controls">
+          <div className="academy-title-row">
+            <h2>Model Academy</h2>
+            <button
+              type="button"
+              className="academy-toggle"
+              onClick={() => setAcademyCollapsed((prev) => !prev)}
+            >
+              {academyCollapsed ? "Expand" : "Collapse"}
+            </button>
+          </div>
+          <div className={`academy-controls ${academyCollapsed ? "collapsed" : ""}`}>
             <div className="academy-tab-group" role="tablist" aria-label="Academy tabs">
               <button
                 type="button"
@@ -883,7 +893,7 @@ export function ProjectionDashboard() {
           </div>
         </div>
 
-        {academyTab === "models" && (
+        {!academyCollapsed && academyTab === "models" && (
           <div className="academy-model-grid">
             {MODEL_ACADEMY.map((model) => (
               <button
@@ -907,7 +917,7 @@ export function ProjectionDashboard() {
           </div>
         )}
 
-        {academyTab === "inputs" && (
+        {!academyCollapsed && academyTab === "inputs" && (
           <div className="academy-input-grid">
             {INPUT_ACADEMY.map((group) => (
               <article key={group.group} className="academy-input-group">
