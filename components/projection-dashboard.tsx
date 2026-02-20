@@ -7,6 +7,8 @@ import { ProjectionChart } from "@/components/projection-chart";
 type PriceMode = "auto" | "manual";
 type ValueView = "both" | "nominal" | "real";
 type YScale = "log" | "linear";
+type InputTab = "core" | "scenarios" | "models" | "display";
+type ThemeName = "neon" | "tron" | "bitcoin";
 type ModelVisibility = {
   fixed: boolean;
   cagr: boolean;
@@ -61,6 +63,8 @@ export function ProjectionDashboard() {
 
   const [valueView, setValueView] = useState<ValueView>("both");
   const [yScale, setYScale] = useState<YScale>("log");
+  const [activeInputTab, setActiveInputTab] = useState<InputTab>("core");
+  const [theme, setTheme] = useState<ThemeName>("bitcoin");
   const [modelVisibility, setModelVisibility] = useState<ModelVisibility>({
     fixed: true,
     cagr: true,
@@ -168,7 +172,7 @@ export function ProjectionDashboard() {
   });
 
   return (
-    <main className="page-shell">
+    <main className={`page-shell theme-${theme}`}>
       <div className="bg-glow bg-glow-a" />
       <div className="bg-glow bg-glow-b" />
 
@@ -184,426 +188,503 @@ export function ProjectionDashboard() {
       <section className="grid-two">
         <div className="panel">
           <h2>Inputs</h2>
+          <div className="input-tabs" role="tablist" aria-label="Input sections">
+            <button
+              type="button"
+              className={`input-tab ${activeInputTab === "core" ? "active" : ""}`}
+              onClick={() => setActiveInputTab("core")}
+            >
+              Core
+            </button>
+            <button
+              type="button"
+              className={`input-tab ${activeInputTab === "scenarios" ? "active" : ""}`}
+              onClick={() => setActiveInputTab("scenarios")}
+            >
+              Scenarios
+            </button>
+            <button
+              type="button"
+              className={`input-tab ${activeInputTab === "models" ? "active" : ""}`}
+              onClick={() => setActiveInputTab("models")}
+            >
+              Models
+            </button>
+            <button
+              type="button"
+              className={`input-tab ${activeInputTab === "display" ? "active" : ""}`}
+              onClick={() => setActiveInputTab("display")}
+            >
+              Display
+            </button>
+          </div>
+
           <div className="control-grid">
-            <label>
-              BTC owned
-              <input
-                type="number"
-                min={0}
-                step="0.01"
-                value={btcOwned}
-                onChange={(e) => setBtcOwned(clamp(safeNumber(e.target.value, btcOwned), 0, 1000000))}
-              />
-            </label>
-
-            <fieldset>
-              <legend>Start price mode</legend>
-              <div className="radio-row">
+            {activeInputTab === "core" && (
+              <>
                 <label>
+                  BTC owned
                   <input
-                    type="radio"
-                    checked={priceMode === "auto"}
-                    onChange={() => setPriceMode("auto")}
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={btcOwned}
+                    onChange={(e) => setBtcOwned(clamp(safeNumber(e.target.value, btcOwned), 0, 1000000))}
                   />
-                  Auto fetch
                 </label>
+
+                <fieldset>
+                  <legend>Start price mode</legend>
+                  <div className="radio-row">
+                    <label>
+                      <input
+                        type="radio"
+                        checked={priceMode === "auto"}
+                        onChange={() => setPriceMode("auto")}
+                      />
+                      Auto fetch
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={priceMode === "manual"}
+                        onChange={() => setPriceMode("manual")}
+                      />
+                      Manual
+                    </label>
+                  </div>
+                </fieldset>
+
                 <label>
+                  Manual BTC price (USD)
                   <input
-                    type="radio"
-                    checked={priceMode === "manual"}
-                    onChange={() => setPriceMode("manual")}
-                  />
-                  Manual
-                </label>
-              </div>
-            </fieldset>
-
-            <label>
-              Manual BTC price (USD)
-              <input
-                type="number"
-                min={1000}
-                step="100"
-                value={manualPrice}
-                onChange={(e) =>
-                  setManualPrice(clamp(safeNumber(e.target.value, manualPrice), 1000, 1000000000))
-                }
-                disabled={priceMode === "auto"}
-              />
-            </label>
-
-            <div className="inline-action">
-              <button type="button" onClick={fetchAutoPrice}>
-                Fetch live BTC price
-              </button>
-              <span>
-                {priceMode === "auto" && !autoPrice && autoPriceStatus === "idle" && "Click to fetch."}
-                {autoPriceStatus === "loading" && "Loading..."}
-                {autoPriceStatus === "error" && "Fetch failed. Try again."}
-                {autoPrice && autoPriceStatus === "idle" && `Latest: ${formatUsd(autoPrice)}`}
-              </span>
-            </div>
-
-            <label>
-              Fixed annual growth (%)
-              <input
-                type="number"
-                min={-80}
-                max={200}
-                step="0.5"
-                value={fixedAnnualGrowthPct}
-                onChange={(e) =>
-                  setFixedAnnualGrowthPct(
-                    clamp(safeNumber(e.target.value, fixedAnnualGrowthPct), -80, 200)
-                  )
-                }
-              />
-            </label>
-
-            <label>
-              CAGR bear (%)
-              <input
-                type="number"
-                min={-50}
-                max={100}
-                step="0.5"
-                value={cagrBearPct}
-                onChange={(e) =>
-                  setCagrBearPct(clamp(safeNumber(e.target.value, cagrBearPct), -50, 100))
-                }
-              />
-            </label>
-
-            <label>
-              CAGR base (%)
-              <input
-                type="number"
-                min={-50}
-                max={100}
-                step="0.5"
-                value={cagrBasePct}
-                onChange={(e) =>
-                  setCagrBasePct(clamp(safeNumber(e.target.value, cagrBasePct), -50, 100))
-                }
-              />
-            </label>
-
-            <label>
-              CAGR bull (%)
-              <input
-                type="number"
-                min={-50}
-                max={100}
-                step="0.5"
-                value={cagrBullPct}
-                onChange={(e) =>
-                  setCagrBullPct(clamp(safeNumber(e.target.value, cagrBullPct), -50, 100))
-                }
-              />
-            </label>
-
-            <label>
-              Inflation (%)
-              <input
-                type="number"
-                min={-5}
-                max={20}
-                step="0.1"
-                value={inflationPct}
-                onChange={(e) =>
-                  setInflationPct(clamp(safeNumber(e.target.value, inflationPct), -5, 20))
-                }
-              />
-            </label>
-
-            <fieldset>
-              <legend>Stock-to-flow style</legend>
-              <label>
-                S2F exponent
-                <input
-                  type="number"
-                  min={0}
-                  max={6}
-                  step="0.1"
-                  value={s2fExponent}
-                  onChange={(e) =>
-                    setS2fExponent(clamp(safeNumber(e.target.value, s2fExponent), 0, 6))
-                  }
-                />
-              </label>
-              <label>
-                Current stock-to-flow ratio
-                <input
-                  type="number"
-                  min={1}
-                  max={300}
-                  step="1"
-                  value={s2fCurrentRatio}
-                  onChange={(e) =>
-                    setS2fCurrentRatio(clamp(safeNumber(e.target.value, s2fCurrentRatio), 1, 300))
-                  }
-                />
-              </label>
-              <label>
-                S2F decay (%)
-                <input
-                  type="number"
-                  min={0}
-                  max={20}
-                  step="0.1"
-                  value={s2fDecayPct}
-                  onChange={(e) =>
-                    setS2fDecayPct(clamp(safeNumber(e.target.value, s2fDecayPct), 0, 20))
-                  }
-                />
-              </label>
-            </fieldset>
-
-            <fieldset>
-              <legend>Power-law trend</legend>
-              <label>
-                Power-law exponent
-                <input
-                  type="number"
-                  min={0}
-                  max={8}
-                  step="0.1"
-                  value={powerLawExponent}
-                  onChange={(e) =>
-                    setPowerLawExponent(
-                      clamp(safeNumber(e.target.value, powerLawExponent), 0, 8)
-                    )
-                  }
-                />
-              </label>
-              <label>
-                BTC age baseline (years)
-                <input
-                  type="number"
-                  min={1}
-                  max={50}
-                  step="1"
-                  value={btcAgeYears}
-                  onChange={(e) =>
-                    setBtcAgeYears(clamp(safeNumber(e.target.value, btcAgeYears), 1, 50))
-                  }
-                />
-              </label>
-            </fieldset>
-
-            <fieldset>
-              <legend>Monte Carlo</legend>
-              <label>
-                Drift (%)
-                <input
-                  type="number"
-                  min={-40}
-                  max={80}
-                  step="0.5"
-                  value={monteCarloDriftPct}
-                  onChange={(e) =>
-                    setMonteCarloDriftPct(
-                      clamp(safeNumber(e.target.value, monteCarloDriftPct), -40, 80)
-                    )
-                  }
-                />
-              </label>
-              <label>
-                Volatility (%)
-                <input
-                  type="number"
-                  min={1}
-                  max={250}
-                  step="1"
-                  value={monteCarloVolPct}
-                  onChange={(e) =>
-                    setMonteCarloVolPct(
-                      clamp(safeNumber(e.target.value, monteCarloVolPct), 1, 250)
-                    )
-                  }
-                />
-              </label>
-              <label>
-                Simulations
-                <input
-                  type="number"
-                  min={50}
-                  max={5000}
-                  step="50"
-                  value={monteCarloSims}
-                  onChange={(e) =>
-                    setMonteCarloSims(clamp(safeNumber(e.target.value, monteCarloSims), 50, 5000))
-                  }
-                />
-              </label>
-            </fieldset>
-
-            <fieldset>
-              <legend>Halving-cycle model</legend>
-              <label>
-                Base growth (%)
-                <input
-                  type="number"
-                  min={-20}
-                  max={120}
-                  step="0.5"
-                  value={halvingBaseGrowthPct}
-                  onChange={(e) =>
-                    setHalvingBaseGrowthPct(
-                      clamp(safeNumber(e.target.value, halvingBaseGrowthPct), -20, 120)
-                    )
-                  }
-                />
-              </label>
-              <label>
-                Cycle amplitude (%)
-                <input
-                  type="number"
-                  min={0}
-                  max={120}
-                  step="0.5"
-                  value={halvingAmplitudePct}
-                  onChange={(e) =>
-                    setHalvingAmplitudePct(
-                      clamp(safeNumber(e.target.value, halvingAmplitudePct), 0, 120)
-                    )
-                  }
-                />
-              </label>
-              <label>
-                Halving decay (%)
-                <input
-                  type="number"
-                  min={0}
-                  max={60}
-                  step="0.5"
-                  value={halvingDecayPct}
-                  onChange={(e) =>
-                    setHalvingDecayPct(
-                      clamp(safeNumber(e.target.value, halvingDecayPct), 0, 60)
-                    )
-                  }
-                />
-              </label>
-            </fieldset>
-
-            <fieldset>
-              <legend>Value view</legend>
-              <div className="radio-row">
-                <label>
-                  <input
-                    type="radio"
-                    checked={valueView === "both"}
-                    onChange={() => setValueView("both")}
-                  />
-                  Both
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    checked={valueView === "nominal"}
-                    onChange={() => setValueView("nominal")}
-                  />
-                  Nominal
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    checked={valueView === "real"}
-                    onChange={() => setValueView("real")}
-                  />
-                  Inflation-adjusted
-                </label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend>Y-axis scale</legend>
-              <div className="radio-row">
-                <label>
-                  <input
-                    type="radio"
-                    checked={yScale === "log"}
-                    onChange={() => setYScale("log")}
-                  />
-                  Log (recommended)
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    checked={yScale === "linear"}
-                    onChange={() => setYScale("linear")}
-                  />
-                  Linear
-                </label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <legend>Visible models</legend>
-              <div className="checkbox-grid">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={modelVisibility.fixed}
+                    type="number"
+                    min={1000}
+                    step="100"
+                    value={manualPrice}
                     onChange={(e) =>
-                      setModelVisibility((prev) => ({ ...prev, fixed: e.target.checked }))
+                      setManualPrice(clamp(safeNumber(e.target.value, manualPrice), 1000, 1000000000))
+                    }
+                    disabled={priceMode === "auto"}
+                  />
+                </label>
+
+                <div className="inline-action">
+                  <button type="button" onClick={fetchAutoPrice}>
+                    Fetch live BTC price
+                  </button>
+                  <span>
+                    {priceMode === "auto" && !autoPrice && autoPriceStatus === "idle" && "Click to fetch."}
+                    {autoPriceStatus === "loading" && "Loading..."}
+                    {autoPriceStatus === "error" && "Fetch failed. Try again."}
+                    {autoPrice && autoPriceStatus === "idle" && `Latest: ${formatUsd(autoPrice)}`}
+                  </span>
+                </div>
+
+                <label>
+                  Inflation (%)
+                  <input
+                    type="number"
+                    min={-5}
+                    max={20}
+                    step="0.1"
+                    value={inflationPct}
+                    onChange={(e) =>
+                      setInflationPct(clamp(safeNumber(e.target.value, inflationPct), -5, 20))
                     }
                   />
-                  Fixed annual
                 </label>
+              </>
+            )}
+
+            {activeInputTab === "scenarios" && (
+              <>
                 <label>
+                  Fixed annual growth (%)
                   <input
-                    type="checkbox"
-                    checked={modelVisibility.cagr}
+                    type="number"
+                    min={-80}
+                    max={200}
+                    step="0.5"
+                    value={fixedAnnualGrowthPct}
                     onChange={(e) =>
-                      setModelVisibility((prev) => ({ ...prev, cagr: e.target.checked }))
+                      setFixedAnnualGrowthPct(
+                        clamp(safeNumber(e.target.value, fixedAnnualGrowthPct), -80, 200)
+                      )
                     }
                   />
-                  CAGR
                 </label>
+
                 <label>
+                  CAGR bear (%)
                   <input
-                    type="checkbox"
-                    checked={modelVisibility.s2f}
+                    type="number"
+                    min={-50}
+                    max={100}
+                    step="0.5"
+                    value={cagrBearPct}
                     onChange={(e) =>
-                      setModelVisibility((prev) => ({ ...prev, s2f: e.target.checked }))
+                      setCagrBearPct(clamp(safeNumber(e.target.value, cagrBearPct), -50, 100))
                     }
                   />
-                  S2F style
                 </label>
+
                 <label>
+                  CAGR base (%)
                   <input
-                    type="checkbox"
-                    checked={modelVisibility.powerLaw}
+                    type="number"
+                    min={-50}
+                    max={100}
+                    step="0.5"
+                    value={cagrBasePct}
                     onChange={(e) =>
-                      setModelVisibility((prev) => ({ ...prev, powerLaw: e.target.checked }))
+                      setCagrBasePct(clamp(safeNumber(e.target.value, cagrBasePct), -50, 100))
                     }
                   />
-                  Power-law
                 </label>
+
                 <label>
+                  CAGR bull (%)
                   <input
-                    type="checkbox"
-                    checked={modelVisibility.monteCarlo}
+                    type="number"
+                    min={-50}
+                    max={100}
+                    step="0.5"
+                    value={cagrBullPct}
                     onChange={(e) =>
-                      setModelVisibility((prev) => ({ ...prev, monteCarlo: e.target.checked }))
+                      setCagrBullPct(clamp(safeNumber(e.target.value, cagrBullPct), -50, 100))
                     }
                   />
-                  Monte Carlo
                 </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={modelVisibility.halving}
-                    onChange={(e) =>
-                      setModelVisibility((prev) => ({ ...prev, halving: e.target.checked }))
-                    }
-                  />
-                  Halving-cycle
-                </label>
-              </div>
-            </fieldset>
+              </>
+            )}
+
+            {activeInputTab === "models" && (
+              <>
+                <fieldset>
+                  <legend>Stock-to-flow style</legend>
+                  <label>
+                    S2F exponent
+                    <input
+                      type="number"
+                      min={0}
+                      max={6}
+                      step="0.1"
+                      value={s2fExponent}
+                      onChange={(e) =>
+                        setS2fExponent(clamp(safeNumber(e.target.value, s2fExponent), 0, 6))
+                      }
+                    />
+                  </label>
+                  <label>
+                    Current stock-to-flow ratio
+                    <input
+                      type="number"
+                      min={1}
+                      max={300}
+                      step="1"
+                      value={s2fCurrentRatio}
+                      onChange={(e) =>
+                        setS2fCurrentRatio(clamp(safeNumber(e.target.value, s2fCurrentRatio), 1, 300))
+                      }
+                    />
+                  </label>
+                  <label>
+                    S2F decay (%)
+                    <input
+                      type="number"
+                      min={0}
+                      max={20}
+                      step="0.1"
+                      value={s2fDecayPct}
+                      onChange={(e) =>
+                        setS2fDecayPct(clamp(safeNumber(e.target.value, s2fDecayPct), 0, 20))
+                      }
+                    />
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Power-law trend</legend>
+                  <label>
+                    Power-law exponent
+                    <input
+                      type="number"
+                      min={0}
+                      max={8}
+                      step="0.1"
+                      value={powerLawExponent}
+                      onChange={(e) =>
+                        setPowerLawExponent(
+                          clamp(safeNumber(e.target.value, powerLawExponent), 0, 8)
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    BTC age baseline (years)
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      step="1"
+                      value={btcAgeYears}
+                      onChange={(e) =>
+                        setBtcAgeYears(clamp(safeNumber(e.target.value, btcAgeYears), 1, 50))
+                      }
+                    />
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Monte Carlo</legend>
+                  <label>
+                    Drift (%)
+                    <input
+                      type="number"
+                      min={-40}
+                      max={80}
+                      step="0.5"
+                      value={monteCarloDriftPct}
+                      onChange={(e) =>
+                        setMonteCarloDriftPct(
+                          clamp(safeNumber(e.target.value, monteCarloDriftPct), -40, 80)
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    Volatility (%)
+                    <input
+                      type="number"
+                      min={1}
+                      max={250}
+                      step="1"
+                      value={monteCarloVolPct}
+                      onChange={(e) =>
+                        setMonteCarloVolPct(
+                          clamp(safeNumber(e.target.value, monteCarloVolPct), 1, 250)
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    Simulations
+                    <input
+                      type="number"
+                      min={50}
+                      max={5000}
+                      step="50"
+                      value={monteCarloSims}
+                      onChange={(e) =>
+                        setMonteCarloSims(clamp(safeNumber(e.target.value, monteCarloSims), 50, 5000))
+                      }
+                    />
+                  </label>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Halving-cycle model</legend>
+                  <label>
+                    Base growth (%)
+                    <input
+                      type="number"
+                      min={-20}
+                      max={120}
+                      step="0.5"
+                      value={halvingBaseGrowthPct}
+                      onChange={(e) =>
+                        setHalvingBaseGrowthPct(
+                          clamp(safeNumber(e.target.value, halvingBaseGrowthPct), -20, 120)
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    Cycle amplitude (%)
+                    <input
+                      type="number"
+                      min={0}
+                      max={120}
+                      step="0.5"
+                      value={halvingAmplitudePct}
+                      onChange={(e) =>
+                        setHalvingAmplitudePct(
+                          clamp(safeNumber(e.target.value, halvingAmplitudePct), 0, 120)
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    Halving decay (%)
+                    <input
+                      type="number"
+                      min={0}
+                      max={60}
+                      step="0.5"
+                      value={halvingDecayPct}
+                      onChange={(e) =>
+                        setHalvingDecayPct(
+                          clamp(safeNumber(e.target.value, halvingDecayPct), 0, 60)
+                        )
+                      }
+                    />
+                  </label>
+                </fieldset>
+              </>
+            )}
+
+            {activeInputTab === "display" && (
+              <>
+                <fieldset>
+                  <legend>Theme</legend>
+                  <div className="radio-row">
+                    <label>
+                      <input
+                        type="radio"
+                        checked={theme === "neon"}
+                        onChange={() => setTheme("neon")}
+                      />
+                      Neon
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={theme === "tron"}
+                        onChange={() => setTheme("tron")}
+                      />
+                      Tron
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={theme === "bitcoin"}
+                        onChange={() => setTheme("bitcoin")}
+                      />
+                      Bitcoin
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Value view</legend>
+                  <div className="radio-row">
+                    <label>
+                      <input
+                        type="radio"
+                        checked={valueView === "both"}
+                        onChange={() => setValueView("both")}
+                      />
+                      Both
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={valueView === "nominal"}
+                        onChange={() => setValueView("nominal")}
+                      />
+                      Nominal
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={valueView === "real"}
+                        onChange={() => setValueView("real")}
+                      />
+                      Inflation-adjusted
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Y-axis scale</legend>
+                  <div className="radio-row">
+                    <label>
+                      <input
+                        type="radio"
+                        checked={yScale === "log"}
+                        onChange={() => setYScale("log")}
+                      />
+                      Log (recommended)
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        checked={yScale === "linear"}
+                        onChange={() => setYScale("linear")}
+                      />
+                      Linear
+                    </label>
+                  </div>
+                </fieldset>
+
+                <fieldset>
+                  <legend>Visible models</legend>
+                  <div className="checkbox-grid">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={modelVisibility.fixed}
+                        onChange={(e) =>
+                          setModelVisibility((prev) => ({ ...prev, fixed: e.target.checked }))
+                        }
+                      />
+                      Fixed annual
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={modelVisibility.cagr}
+                        onChange={(e) =>
+                          setModelVisibility((prev) => ({ ...prev, cagr: e.target.checked }))
+                        }
+                      />
+                      CAGR
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={modelVisibility.s2f}
+                        onChange={(e) =>
+                          setModelVisibility((prev) => ({ ...prev, s2f: e.target.checked }))
+                        }
+                      />
+                      S2F style
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={modelVisibility.powerLaw}
+                        onChange={(e) =>
+                          setModelVisibility((prev) => ({ ...prev, powerLaw: e.target.checked }))
+                        }
+                      />
+                      Power-law
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={modelVisibility.monteCarlo}
+                        onChange={(e) =>
+                          setModelVisibility((prev) => ({ ...prev, monteCarlo: e.target.checked }))
+                        }
+                      />
+                      Monte Carlo
+                    </label>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={modelVisibility.halving}
+                        onChange={(e) =>
+                          setModelVisibility((prev) => ({ ...prev, halving: e.target.checked }))
+                        }
+                      />
+                      Halving-cycle
+                    </label>
+                  </div>
+                </fieldset>
+              </>
+            )}
           </div>
         </div>
 

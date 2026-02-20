@@ -2,6 +2,10 @@
   color-scheme: dark;
   --bg-0: #050715;
   --bg-1: #0b1433;
+  --bg-radial: #121f58;
+  --bg-linear-a: #040714;
+  --bg-linear-b: #070b1f;
+  --bg-linear-c: #0d0a2e;
   --panel: rgba(9, 16, 42, 0.58);
   --panel-border: rgba(130, 246, 255, 0.28);
   --txt-main: #f4fbff;
@@ -9,6 +13,21 @@
   --cyan: #4df5ff;
   --pink: #ff5fd2;
   --green: #81ffad;
+  --glow-a: rgba(77, 245, 255, 0.25);
+  --glow-b: rgba(255, 95, 210, 0.2);
+  --btn-txt: #021218;
+  --chart-fixed-nominal: #4df5ff;
+  --chart-cagr-nominal: #ff5fd2;
+  --chart-s2f-nominal: #81ffad;
+  --chart-power-nominal: #ffb347;
+  --chart-halving-nominal: #93a9ff;
+  --chart-mc-nominal: #ffd166;
+  --chart-fixed-real: #99fff5;
+  --chart-cagr-real: #ffc5ef;
+  --chart-s2f-real: #b6ffd0;
+  --chart-power-real: #ffd7a8;
+  --chart-halving-real: #c5d1ff;
+  --chart-mc-real: #ffeab8;
 }
 
 * {
@@ -20,8 +39,8 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: radial-gradient(circle at 20% 20%, #121f58 0%, var(--bg-0) 45%),
-    linear-gradient(130deg, #040714 0%, #070b1f 55%, #0d0a2e 100%);
+  background: radial-gradient(circle at 20% 20%, var(--bg-radial) 0%, var(--bg-0) 45%),
+    linear-gradient(130deg, var(--bg-linear-a) 0%, var(--bg-linear-b) 55%, var(--bg-linear-c) 100%);
   color: var(--txt-main);
   font-family: "Space Grotesk", "Sora", "Segoe UI", sans-serif;
 }
@@ -43,7 +62,7 @@ body {
 .bg-glow-a {
   width: 360px;
   height: 360px;
-  background: rgba(77, 245, 255, 0.25);
+  background: var(--glow-a);
   top: -120px;
   left: -120px;
 }
@@ -51,7 +70,7 @@ body {
 .bg-glow-b {
   width: 420px;
   height: 420px;
-  background: rgba(255, 95, 210, 0.2);
+  background: var(--glow-b);
   bottom: -140px;
   right: -100px;
 }
@@ -112,6 +131,38 @@ h2 {
 .control-grid {
   display: grid;
   gap: 12px;
+}
+
+.input-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-tab {
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(149, 226, 255, 0.25);
+  background: rgba(8, 14, 36, 0.72);
+  color: #b8cdf1;
+  font-weight: 600;
+  padding: 0 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-tab:hover {
+  border-color: rgba(77, 245, 255, 0.5);
+  color: #e8faff;
+  box-shadow: 0 6px 14px rgba(77, 245, 255, 0.12);
+}
+
+.input-tab.active {
+  border-color: rgba(77, 245, 255, 0.7);
+  color: #e8fdff;
+  background: rgba(15, 28, 62, 0.95);
+  box-shadow: 0 8px 20px rgba(77, 245, 255, 0.18);
 }
 
 label,
@@ -192,9 +243,9 @@ fieldset {
   flex-wrap: wrap;
 }
 
-button {
+button:not(.input-tab) {
   border: 0;
-  color: #021218;
+  color: var(--btn-txt);
   font-weight: 700;
   background: linear-gradient(90deg, var(--cyan), #79ffe0);
   border-radius: 999px;
@@ -203,7 +254,7 @@ button {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-button:hover {
+button:not(.input-tab):hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 22px rgba(77, 245, 255, 0.3);
 }
@@ -230,6 +281,84 @@ button:hover {
 .stat-grid h3 {
   font-size: clamp(16px, 1.9vw, 24px);
   color: var(--green);
+}
+
+.theme-neon {
+  --bg-0: #050715;
+  --bg-radial: #121f58;
+  --bg-linear-a: #040714;
+  --bg-linear-b: #070b1f;
+  --bg-linear-c: #0d0a2e;
+  --panel: rgba(9, 16, 42, 0.58);
+  --panel-border: rgba(130, 246, 255, 0.28);
+  --txt-main: #f4fbff;
+  --txt-muted: #9bb2d9;
+  --cyan: #4df5ff;
+  --pink: #ff5fd2;
+  --green: #81ffad;
+  --glow-a: rgba(77, 245, 255, 0.25);
+  --glow-b: rgba(255, 95, 210, 0.2);
+  --btn-txt: #021218;
+}
+
+.theme-tron {
+  --bg-0: #020910;
+  --bg-radial: #0f2c34;
+  --bg-linear-a: #03121e;
+  --bg-linear-b: #031018;
+  --bg-linear-c: #001117;
+  --panel: rgba(4, 22, 30, 0.62);
+  --panel-border: rgba(0, 245, 255, 0.38);
+  --txt-main: #e9feff;
+  --txt-muted: #9fd6da;
+  --cyan: #00f6ff;
+  --pink: #00c2ff;
+  --green: #73ffd2;
+  --glow-a: rgba(0, 246, 255, 0.28);
+  --glow-b: rgba(0, 194, 255, 0.2);
+  --btn-txt: #001014;
+  --chart-fixed-nominal: #00f6ff;
+  --chart-cagr-nominal: #ff4fd8;
+  --chart-s2f-nominal: #7dff63;
+  --chart-power-nominal: #ff9b3d;
+  --chart-halving-nominal: #8e9dff;
+  --chart-mc-nominal: #ffd84d;
+  --chart-fixed-real: #8ffcff;
+  --chart-cagr-real: #ffb7ef;
+  --chart-s2f-real: #c4ffb8;
+  --chart-power-real: #ffd2a6;
+  --chart-halving-real: #c8ceff;
+  --chart-mc-real: #fff0ab;
+}
+
+.theme-bitcoin {
+  --bg-0: #140c05;
+  --bg-radial: #3d2108;
+  --bg-linear-a: #1a0f05;
+  --bg-linear-b: #120b05;
+  --bg-linear-c: #2a1204;
+  --panel: rgba(34, 16, 4, 0.62);
+  --panel-border: rgba(247, 147, 26, 0.42);
+  --txt-main: #fff5e8;
+  --txt-muted: #e6c8a3;
+  --cyan: #f7931a;
+  --pink: #ffd18a;
+  --green: #ffbe63;
+  --glow-a: rgba(247, 147, 26, 0.32);
+  --glow-b: rgba(255, 209, 138, 0.24);
+  --btn-txt: #2a1403;
+  --chart-fixed-nominal: #f7931a;
+  --chart-cagr-nominal: #63e6ff;
+  --chart-s2f-nominal: #7fff8a;
+  --chart-power-nominal: #ff62c5;
+  --chart-halving-nominal: #8ea7ff;
+  --chart-mc-nominal: #ffe066;
+  --chart-fixed-real: #ffd89f;
+  --chart-cagr-real: #c5f2ff;
+  --chart-s2f-real: #caffcf;
+  --chart-power-real: #ffc1eb;
+  --chart-halving-real: #cdd8ff;
+  --chart-mc-real: #fff2af;
 }
 
 .chart-wrap {
@@ -295,75 +424,75 @@ button:hover {
 }
 
 .legend-fixedNominal {
-  background: #4df5ff;
+  background: var(--chart-fixed-nominal);
 }
 
 .legend-cagrNominal {
-  background: #ff5fd2;
+  background: var(--chart-cagr-nominal);
 }
 
 .legend-s2fNominal {
-  background: #81ffad;
+  background: var(--chart-s2f-nominal);
 }
 
 .legend-powerNominal {
-  background: #ffb347;
+  background: var(--chart-power-nominal);
 }
 
 .legend-halvingNominal {
-  background: #93a9ff;
+  background: var(--chart-halving-nominal);
 }
 
 .legend-mcMedianNominal {
-  background: #ffd166;
+  background: var(--chart-mc-nominal);
 }
 
 .legend-bandCagrNominal {
-  background: linear-gradient(90deg, rgba(77, 245, 255, 0.55), rgba(77, 245, 255, 0.18));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--chart-fixed-nominal) 75%, transparent), color-mix(in srgb, var(--chart-fixed-nominal) 30%, transparent));
 }
 
 .legend-bandMcNominal {
-  background: linear-gradient(90deg, rgba(255, 209, 102, 0.55), rgba(255, 209, 102, 0.18));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--chart-mc-nominal) 75%, transparent), color-mix(in srgb, var(--chart-mc-nominal) 30%, transparent));
 }
 
 .legend-fixedReal {
   background: repeating-linear-gradient(
     90deg,
-    #99fff5 0 7px,
-    rgba(153, 255, 245, 0.2) 7px 11px
+    var(--chart-fixed-real) 0 7px,
+    color-mix(in srgb, var(--chart-fixed-real) 25%, transparent) 7px 11px
   );
 }
 
 .legend-cagrReal {
   background: repeating-linear-gradient(
     90deg,
-    #ffc5ef 0 7px,
-    rgba(255, 197, 239, 0.2) 7px 11px
+    var(--chart-cagr-real) 0 7px,
+    color-mix(in srgb, var(--chart-cagr-real) 25%, transparent) 7px 11px
   );
 }
 
 .legend-s2fReal {
-  background: repeating-linear-gradient(90deg, #b6ffd0 0 7px, rgba(182, 255, 208, 0.2) 7px 11px);
+  background: repeating-linear-gradient(90deg, var(--chart-s2f-real) 0 7px, color-mix(in srgb, var(--chart-s2f-real) 25%, transparent) 7px 11px);
 }
 
 .legend-powerReal {
-  background: repeating-linear-gradient(90deg, #ffd7a8 0 7px, rgba(255, 215, 168, 0.2) 7px 11px);
+  background: repeating-linear-gradient(90deg, var(--chart-power-real) 0 7px, color-mix(in srgb, var(--chart-power-real) 25%, transparent) 7px 11px);
 }
 
 .legend-halvingReal {
-  background: repeating-linear-gradient(90deg, #c5d1ff 0 7px, rgba(197, 209, 255, 0.2) 7px 11px);
+  background: repeating-linear-gradient(90deg, var(--chart-halving-real) 0 7px, color-mix(in srgb, var(--chart-halving-real) 25%, transparent) 7px 11px);
 }
 
 .legend-mcMedianReal {
-  background: repeating-linear-gradient(90deg, #ffeab8 0 7px, rgba(255, 234, 184, 0.2) 7px 11px);
+  background: repeating-linear-gradient(90deg, var(--chart-mc-real) 0 7px, color-mix(in srgb, var(--chart-mc-real) 25%, transparent) 7px 11px);
 }
 
 .legend-bandCagrReal {
-  background: linear-gradient(90deg, rgba(127, 247, 238, 0.5), rgba(127, 247, 238, 0.18));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--chart-fixed-real) 70%, transparent), color-mix(in srgb, var(--chart-fixed-real) 30%, transparent));
 }
 
 .legend-bandMcReal {
-  background: linear-gradient(90deg, rgba(255, 181, 240, 0.5), rgba(255, 181, 240, 0.18));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--chart-mc-real) 70%, transparent), color-mix(in srgb, var(--chart-mc-real) 30%, transparent));
 }
 
 .table-wrap {
@@ -420,5 +549,9 @@ table th:first-child {
 
   .checkbox-grid {
     grid-template-columns: 1fr;
+  }
+
+  .input-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

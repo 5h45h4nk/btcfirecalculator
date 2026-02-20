@@ -234,20 +234,20 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
         <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" role="img" aria-label="Projection chart">
         <defs>
           <linearGradient id="bandCagrNominal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4df5ff" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#4df5ff" stopOpacity="0.06" />
+            <stop offset="0%" stopColor="var(--chart-fixed-nominal)" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="var(--chart-fixed-nominal)" stopOpacity="0.06" />
           </linearGradient>
           <linearGradient id="bandMcNominal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffd166" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#ffd166" stopOpacity="0.07" />
+            <stop offset="0%" stopColor="var(--chart-mc-nominal)" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="var(--chart-mc-nominal)" stopOpacity="0.07" />
           </linearGradient>
           <linearGradient id="bandCagrReal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#7ff7ee" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#7ff7ee" stopOpacity="0.03" />
+            <stop offset="0%" stopColor="var(--chart-fixed-real)" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="var(--chart-fixed-real)" stopOpacity="0.03" />
           </linearGradient>
           <linearGradient id="bandMcReal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#ffb5f0" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#ffb5f0" stopOpacity="0.03" />
+            <stop offset="0%" stopColor="var(--chart-mc-real)" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="var(--chart-mc-real)" stopOpacity="0.03" />
           </linearGradient>
         </defs>
 
@@ -305,7 +305,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(fixedNominalPts)}
                 fill="none"
-                stroke="#4df5ff"
+                stroke="var(--chart-fixed-nominal)"
                 strokeWidth={toneStrokeWidth("fixedNominal", 3)}
                 opacity={toneOpacity("fixedNominal")}
               />
@@ -314,7 +314,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(cagrBaseNominalPts)}
                 fill="none"
-                stroke="#ff5fd2"
+                stroke="var(--chart-cagr-nominal)"
                 strokeWidth={toneStrokeWidth("cagrNominal", 2.5)}
                 opacity={toneOpacity("cagrNominal")}
               />
@@ -323,7 +323,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(s2fNominalPts)}
                 fill="none"
-                stroke="#81ffad"
+                stroke="var(--chart-s2f-nominal)"
                 strokeWidth={toneStrokeWidth("s2fNominal", 2.2)}
                 opacity={toneOpacity("s2fNominal")}
               />
@@ -332,7 +332,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(powerNominalPts)}
                 fill="none"
-                stroke="#ffb347"
+                stroke="var(--chart-power-nominal)"
                 strokeWidth={toneStrokeWidth("powerNominal", 2.2)}
                 opacity={toneOpacity("powerNominal")}
               />
@@ -341,7 +341,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(halvingNominalPts)}
                 fill="none"
-                stroke="#93a9ff"
+                stroke="var(--chart-halving-nominal)"
                 strokeWidth={toneStrokeWidth("halvingNominal", 2.2)}
                 opacity={toneOpacity("halvingNominal")}
               />
@@ -350,7 +350,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(mcMedianNominalPts)}
                 fill="none"
-                stroke="#ffd166"
+                stroke="var(--chart-mc-nominal)"
                 strokeWidth={toneStrokeWidth("mcMedianNominal", 2.2)}
                 opacity={toneOpacity("mcMedianNominal")}
               />
@@ -378,7 +378,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(fixedRealPts)}
                 fill="none"
-                stroke="#99fff5"
+                stroke="var(--chart-fixed-real)"
                 strokeWidth={toneStrokeWidth("fixedReal", 2)}
                 strokeDasharray="8 6"
                 opacity={toneOpacity("fixedReal")}
@@ -388,7 +388,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(cagrBaseRealPts)}
                 fill="none"
-                stroke="#ffc5ef"
+                stroke="var(--chart-cagr-real)"
                 strokeWidth={toneStrokeWidth("cagrReal", 2)}
                 strokeDasharray="8 6"
                 opacity={toneOpacity("cagrReal")}
@@ -398,7 +398,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(s2fRealPts)}
                 fill="none"
-                stroke="#b6ffd0"
+                stroke="var(--chart-s2f-real)"
                 strokeWidth={toneStrokeWidth("s2fReal", 1.8)}
                 strokeDasharray="8 6"
                 opacity={toneOpacity("s2fReal")}
@@ -408,7 +408,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(powerRealPts)}
                 fill="none"
-                stroke="#ffd7a8"
+                stroke="var(--chart-power-real)"
                 strokeWidth={toneStrokeWidth("powerReal", 1.8)}
                 strokeDasharray="8 6"
                 opacity={toneOpacity("powerReal")}
@@ -418,7 +418,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(halvingRealPts)}
                 fill="none"
-                stroke="#c5d1ff"
+                stroke="var(--chart-halving-real)"
                 strokeWidth={toneStrokeWidth("halvingReal", 1.8)}
                 strokeDasharray="8 6"
                 opacity={toneOpacity("halvingReal")}
@@ -428,7 +428,7 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
               <path
                 d={toPath(mcMedianRealPts)}
                 fill="none"
-                stroke="#ffeab8"
+                stroke="var(--chart-mc-real)"
                 strokeWidth={toneStrokeWidth("mcMedianReal", 1.8)}
                 strokeDasharray="8 6"
                 opacity={toneOpacity("mcMedianReal")}
