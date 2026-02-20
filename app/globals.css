@@ -377,6 +377,7 @@ button:not(.input-tab):hover {
   width: 100%;
   height: auto;
   aspect-ratio: var(--chart-aspect, 1000 / 620);
+  touch-action: none;
   border: 1px solid rgba(149, 226, 255, 0.2);
   border-radius: 14px;
   background: rgba(4, 9, 29, 0.45);

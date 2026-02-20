@@ -178,6 +178,14 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
     hoverLegendTone === null || hoverLegendTone === tone ? 1 : 0.16;
   const toneStrokeWidth = (tone: string, base: number) =>
     hoverLegendTone === tone ? base + 1 : base;
+  const updateHoverByClientX = (clientX: number, el: HTMLDivElement) => {
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const normalizedX = (x / rect.width) * W;
+    const year = ((normalizedX - PAD.left) / plotW) * xMax;
+    const idx = Math.max(0, Math.min(points.length - 1, Math.round(year)));
+    setHoverIndex(idx);
+  };
   const legendItems = [
     ...(valueView === "both" || valueView === "nominal"
       ? [
@@ -244,12 +252,19 @@ export function ProjectionChart({ points, valueView, yScale, modelVisibility }: 
         style={{ "--chart-aspect": `${W} / ${H}` } as React.CSSProperties}
         onMouseLeave={() => setHoverIndex(null)}
         onMouseMove={(e) => {
-          const el = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - el.left;
-          const normalizedX = (x / el.width) * W;
-          const year = ((normalizedX - PAD.left) / plotW) * xMax;
-          const idx = Math.max(0, Math.min(points.length - 1, Math.round(year)));
-          setHoverIndex(idx);
+          updateHoverByClientX(e.clientX, e.currentTarget);
+        }}
+        onTouchStart={(e) => {
+          if (e.touches.length === 0) {
+            return;
+          }
+          updateHoverByClientX(e.touches[0].clientX, e.currentTarget);
+        }}
+        onTouchMove={(e) => {
+          if (e.touches.length === 0) {
+            return;
+          }
+          updateHoverByClientX(e.touches[0].clientX, e.currentTarget);
         }}
       >
         <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" role="img" aria-label="Projection chart">
